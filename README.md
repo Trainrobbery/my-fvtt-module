@@ -7,7 +7,34 @@ v1.1.1은 설치 경로 혼동을 줄이도록 ZIP 최상위에 module.json을 �
 maximum: 13 제한도 제거했습니다. 이는 이후 버전에서의 활성화 제한을 없애는
 변경이며, v14 이상의 실제 기능 호환성을 검증했다는 뜻은 아닙니다.
 
-## 설치
+## 설치 (권장: Manifest URL)
+
+이 모듈은 Foundry VTT v13 이상을 대상으로 합니다.
+v14 이상의 실제 호환성은 아직 검증되지 않았습니다.
+
+### 간편 설치 방법
+
+1. Foundry VTT를 실행하고 Setup 화면으로 이동합니다.
+2. **Add-on Modules(애드온 모듈)** 탭을 엽니다.
+3. **Install Module(모듈 설치)** 버튼을 클릭합니다.
+4. 아래 Manifest URL을 입력합니다.
+
+`https://raw.githubusercontent.com/Trainrobbery/my-fvtt-module/main/module.json`
+
+5. **Install(설치)** 버튼을 눌러 설치합니다.
+6. 게임 월드에 GM으로 접속합니다.
+7. **설정 → 모듈 관리(Manage Modules)** 에서
+   **내 멋진 모듈: 그리기 설명**을 활성화합니다.
+8. 모듈 설정을 저장하고 필요한 경우 새로고침합니다.
+
+이 모듈은 아직 Foundry 공식 모듈 목록에 등록되지 않았습니다.
+따라서 모듈 이름으로 검색하는 대신 위 주소로 설치해 주세요.
+
+### 최신 배포 파일
+
+[GitHub Releases에서 확인하기](https://github.com/Trainrobbery/my-fvtt-module/releases)
+
+## 수동 설치 (대체 방법)
 
 1. Foundry가 실행되는 컴퓨터의 실제 사용자 데이터 폴더를 확인합니다.
 2. 그 안의 `Data/modules/my-module/` 폴더를 만들고 ZIP 내용물을 **그 안에 직접** 풉니다.
