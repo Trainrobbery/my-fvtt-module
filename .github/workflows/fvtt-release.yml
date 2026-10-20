@@ -2,15 +2,18 @@
 name: FVTT Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New version (example: 1.4.2)"
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: fvtt-release-${{ github.ref }}
+  group: fvtt-release
   cancel-in-progress: false
 
 jobs:
@@ -21,29 +24,29 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Verify module version
+      - name: Verify version
         env:
-          TAG: ${{ github.ref_name }}
+          VERSION: ${{ inputs.version }}
         run: |
           python3 - <<'PY'
           import json
           import os
           import re
 
-          tag = os.environ["TAG"]
+          version = os.environ["VERSION"]
 
-          assert re.fullmatch(r"v\d+\.\d+\.\d+", tag), "Invalid tag"
-          assert tag != "v1.4.1", "Existing v1.4.1 is protected"
+          assert re.fullmatch(r"\d+\.\d+\.\d+", version), "Invalid version"
+          assert tuple(map(int, version.split("."))) > (1, 4, 1), "Existing versions are protected"
 
           with open("module.json", encoding="utf-8") as f:
               module = json.load(f)
 
           assert module["id"] == "my-module"
-          assert module["version"] == tag[1:], "Version mismatch"
+          assert module["version"] == version, "Version mismatch"
 
           expected = (
               "https://github.com/Trainrobbery/my-fvtt-module/"
-              f"releases/download/{tag}/my-module.zip"
+              f"releases/download/v{version}/my-module.zip"
           )
           assert module["download"] == expected, "Download URL mismatch"
 
@@ -52,16 +55,23 @@ jobs:
               "Trainrobbery/my-fvtt-module/main/module.json"
           ), "Manifest URL mismatch"
 
-          print("Version check passed:", tag)
+          print("Version verified:", version)
           PY
 
-      - name: Protect existing releases
+      - name: Protect existing releases and tags
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
         run: |
+          TAG="v${VERSION}"
+
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release already exists. Stopping."
+            echo "Release already exists: $TAG"
+            exit 1
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag already exists: $TAG"
             exit 1
           fi
 
@@ -71,7 +81,7 @@ jobs:
 
       - name: Verify ZIP
         env:
-          TAG: ${{ github.ref_name }}
+          VERSION: ${{ inputs.version }}
         run: |
           python3 - <<'PY'
           import json
@@ -87,17 +97,17 @@ jobs:
               assert z.testzip() is None
 
               module = json.loads(z.read("module.json"))
-              assert module["version"] == os.environ["TAG"][1:]
+              assert module["version"] == os.environ["VERSION"]
 
           print("ZIP verification passed")
           PY
 
-      - name: Publish GitHub Release
+      - name: Publish Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
         run: |
-          gh release create "$TAG" ./my-module.zip \
-            --verify-tag \
-            --title "$TAG" \
+          gh release create "v${VERSION}" ./my-module.zip \
+            --target "$(git rev-parse HEAD)" \
+            --title "v${VERSION}" \
             --generate-notes
