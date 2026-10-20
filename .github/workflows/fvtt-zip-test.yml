@@ -1,0 +1,41 @@
+
+name: FVTT ZIP Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download source files
+        uses: actions/checkout@v4
+
+      - name: Create module ZIP
+        run: |
+          git archive --format=zip --output=my-module.zip HEAD -- . ':(exclude).github'
+
+      - name: Verify module ZIP
+        run: |
+          python3 - <<'PY'
+          import json
+          import zipfile
+
+          with zipfile.ZipFile("my-module.zip") as z:
+              info = json.loads(z.read("module.json"))
+              assert info["id"] == "my-module"
+              assert info["version"] == "1.4.1"
+              assert z.testzip() is None
+              print("ZIP verified:", info["version"])
+          PY
+
+      - name: Save test ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: fvtt-zip-test
+          path: my-module.zip
+          if-no-files-found: error
