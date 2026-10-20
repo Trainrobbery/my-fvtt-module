@@ -1,0 +1,103 @@
+
+name: FVTT Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fvtt-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Verify module version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+
+          tag = os.environ["TAG"]
+
+          assert re.fullmatch(r"v\d+\.\d+\.\d+", tag), "Invalid tag"
+          assert tag != "v1.4.1", "Existing v1.4.1 is protected"
+
+          with open("module.json", encoding="utf-8") as f:
+              module = json.load(f)
+
+          assert module["id"] == "my-module"
+          assert module["version"] == tag[1:], "Version mismatch"
+
+          expected = (
+              "https://github.com/Trainrobbery/my-fvtt-module/"
+              f"releases/download/{tag}/my-module.zip"
+          )
+          assert module["download"] == expected, "Download URL mismatch"
+
+          assert module["manifest"] == (
+              "https://raw.githubusercontent.com/"
+              "Trainrobbery/my-fvtt-module/main/module.json"
+          ), "Manifest URL mismatch"
+
+          print("Version check passed:", tag)
+          PY
+
+      - name: Protect existing releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release already exists. Stopping."
+            exit 1
+          fi
+
+      - name: Create module ZIP
+        run: |
+          git archive --format=zip --output=my-module.zip HEAD -- . ':(exclude).github'
+
+      - name: Verify ZIP
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import zipfile
+
+          with zipfile.ZipFile("my-module.zip") as z:
+              files = set(z.namelist())
+
+              assert "module.json" in files
+              assert "my-module.js" in files
+              assert "my-module.css" in files
+              assert z.testzip() is None
+
+              module = json.loads(z.read("module.json"))
+              assert module["version"] == os.environ["TAG"][1:]
+
+          print("ZIP verification passed")
+          PY
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" ./my-module.zip \
+            --verify-tag \
+            --title "$TAG" \
+            --generate-notes
