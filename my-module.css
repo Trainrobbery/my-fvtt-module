@@ -1,0 +1,73 @@
+#my-module-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  box-sizing: border-box;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: hidden;
+  padding: 10px 14px;
+  border: 1px solid #c8ad72;
+  border-radius: 7px;
+  background: rgba(22, 20, 28, 0.96);
+  color: #f7f3e8;
+  font: 14px/1.6 sans-serif;
+  box-shadow: 0 4px 18px #0008;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#my-module-tooltip[hidden] { display: none; }
+#my-module-tooltip > strong { display: block; color: #f0d99d; }
+#my-module-tooltip > strong:empty { display: none; }
+#my-module-tooltip .my-module-markdown { white-space: normal; }
+#my-module-tooltip .my-module-markdown > :first-child { margin-top: 0; }
+#my-module-tooltip .my-module-markdown > :last-child { margin-bottom: 0; }
+#my-module-tooltip .my-module-markdown p { margin: 0.35em 0; }
+#my-module-tooltip .my-module-markdown :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0.6em 0 0.3em;
+  border: 0;
+  color: #f0d99d;
+  font-family: inherit;
+  font-weight: bold;
+  line-height: 1.35;
+}
+#my-module-tooltip .my-module-markdown h1 { font-size: 1.35em; }
+#my-module-tooltip .my-module-markdown h2 { font-size: 1.2em; }
+#my-module-tooltip .my-module-markdown :is(h3, h4, h5, h6) { font-size: 1.05em; }
+#my-module-tooltip .my-module-markdown :is(ul, ol) { margin: 0.35em 0; padding-left: 1.5em; }
+#my-module-tooltip .my-module-markdown blockquote {
+  margin: 0.5em 0;
+  padding: 0.1em 0.7em;
+  border-left: 3px solid #c8ad72;
+  color: #ddd3bf;
+}
+#my-module-tooltip .my-module-markdown code {
+  padding: 0.1em 0.25em;
+  background: #ffffff14;
+  color: inherit;
+  font-family: monospace;
+}
+#my-module-tooltip .my-module-markdown pre {
+  margin: 0.4em 0;
+  padding: 0.5em;
+  white-space: pre-wrap;
+  background: #0004;
+  border: 0;
+}
+#my-module-tooltip .my-module-markdown pre code { padding: 0; background: none; }
+#my-module-tooltip .my-module-markdown a { color: #acd8ff; text-decoration: underline; }
+#my-module-tooltip .my-module-markdown table {
+  width: 100%;
+  margin: 0.5em 0;
+  border-collapse: collapse;
+  background: transparent;
+  font-size: 0.9em;
+}
+#my-module-tooltip .my-module-markdown :is(th, td) { border: 1px solid #ffffff40; padding: 0.2em 0.4em; }
+#my-module-tooltip .my-module-markdown hr { border: 0; border-top: 1px solid #ffffff40; }
+.my-module-hover-field textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  box-sizing: border-box;
+}

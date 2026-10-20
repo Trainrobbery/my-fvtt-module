@@ -1,0 +1,10 @@
+{
+  "id": "my-module",
+  "title": "내 멋진 모듈: 그리기 설명",
+  "description": "그리기 오브젝트에 마우스를 올리면 설명을 보여주는 간단한 예제입니다.",
+  "version": "1.4.0",
+  "compatibility": { "minimum": "13" },
+  "authors": [{ "name": "내 이름" }],
+  "esmodules": ["my-module.js"],
+  "styles": ["my-module.css"]
+}
